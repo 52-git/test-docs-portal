@@ -1,5 +1,6 @@
 # Test Docs Portal
 
+v1.1
 This site is built with MkDocs (Material theme) and supports **selectable legacy versions**.
 
 ## How versioning works
