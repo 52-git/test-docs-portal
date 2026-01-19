@@ -1,10 +1,15 @@
-name: Docs Versioned Deploy
+name: Docs Versioned Deploy (Amplify)
 
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to deploy (e.g. v1.2.0). Leave empty when triggered by tag push."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -16,11 +21,19 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: docs-dist
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Fetch tags
+        run: |
+          set -euo pipefail
+          git fetch --force --tags
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,25 +50,50 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-      - name: Deploy tagged version
+      - name: Deploy version to docs-dist
         env:
-          TAG: ${{ github.ref_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           set -euo pipefail
 
-          # Determine the newest version tag to keep the 'latest' alias stable.
+          # Decide which tag to deploy
+          TAG=""
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            TAG="${INPUT_TAG}"
+          else
+            TAG="${REF_NAME}"
+          fi
+
+          if [ -z "${TAG}" ]; then
+            echo "ERROR: Tag is empty. For manual run, set 'tag' input like v1.2.0."
+            exit 1
+          fi
+
+          # Ensure the tag exists locally
+          if ! git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "ERROR: Tag ${TAG} not found."
+            echo "Available tags:"
+            git tag -l 'v*' | sort -V || true
+            exit 1
+          fi
+
+          # Determine the newest version tag to keep the 'latest' alias stable
           LATEST_TAG="$(git tag -l 'v*' | sort -V | tail -n 1)"
 
           echo "TAG=${TAG}"
           echo "LATEST_TAG=${LATEST_TAG}"
+          echo "TARGET_BRANCH=${TARGET_BRANCH}"
 
           if [ "${TAG}" = "${LATEST_TAG}" ]; then
-            mike deploy --push --update-aliases "${TAG}" latest
-            mike set-default --push latest
+            mike deploy --branch "${TARGET_BRANCH}" --push --update-aliases "${TAG}" latest
+            mike set-default --branch "${TARGET_BRANCH}" --push latest
           else
-            mike deploy --push "${TAG}"
+            mike deploy --branch "${TARGET_BRANCH}" --push "${TAG}"
           fi
 
       - name: List deployed versions
         run: |
-          mike list || true
+          set -euo pipefail
+          mike list --branch "${TARGET_BRANCH}" || true
