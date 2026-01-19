@@ -58,6 +58,7 @@ jobs:
           fi
 
       - name: Ensure amplify.yml exists on docs-dist branch
+        shell: bash
         run: |
           set -euo pipefail
 
@@ -66,19 +67,19 @@ jobs:
 
           if [ ! -f amplify.yml ]; then
             cat > amplify.yml <<'YAML'
-            version: 1
-            frontend:
-              phases:
-                build:
-                  commands:
-                    - echo "No build step (prebuilt static site)"
-              artifacts:
-                baseDirectory: .
-                files:
-                  - '**/*'
-              cache:
-                paths: []
-            YAML
+version: 1
+frontend:
+  phases:
+    build:
+      commands:
+        - echo "No build step (prebuilt static site)"
+  artifacts:
+    baseDirectory: .
+    files:
+      - '**/*'
+  cache:
+    paths: []
+YAML
 
             git add amplify.yml
             git commit -m "chore: add amplify build spec"
