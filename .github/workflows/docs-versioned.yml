@@ -1,0 +1,61 @@
+name: Docs Versioned Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-versioned
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install MkDocs and mike
+        run: |
+          python -m pip install --upgrade pip
+          pip install mkdocs-material mike
+
+      - name: Configure git user
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Deploy tagged version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          # Determine the newest version tag to keep the 'latest' alias stable.
+          LATEST_TAG="$(git tag -l 'v*' | sort -V | tail -n 1)"
+
+          echo "TAG=${TAG}"
+          echo "LATEST_TAG=${LATEST_TAG}"
+
+          if [ "${TAG}" = "${LATEST_TAG}" ]; then
+            mike deploy --push --update-aliases "${TAG}" latest
+            mike set-default --push latest
+          else
+            mike deploy --push "${TAG}"
+          fi
+
+      - name: List deployed versions
+        run: |
+          mike list || true

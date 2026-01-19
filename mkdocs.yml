@@ -1,0 +1,32 @@
+site_name: Test Docs Portal
+site_description: Documentation portal with selectable legacy versions
+
+theme:
+  name: material
+
+plugins: []
+
+nav:
+  - Home: index.md
+
+  - フロントエンド:
+      - 概要: frontend/index.md
+      - 全体構成: frontend/architecture.md
+      - チャット管理: frontend/chat.md
+      - 認証情報: frontend/auth.md
+      - 画面一覧: frontend/pages.md
+      - 共通レイアウト: frontend/layout.md
+      - 共通フック: frontend/hooks.md
+
+  - バックエンド:
+      - 概要: backend/index.md
+      - 全体構成: backend/architecture.md
+      - REST API概要: backend/api.md
+      - LLM連携: backend/integrations.md
+      - DDBリポジトリ: backend/repositories.md
+      - サービス: backend/services.md
+      - タスク: backend/tasks.md
+
+extra:
+  version:
+    provider: mike

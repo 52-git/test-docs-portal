@@ -1,0 +1,13 @@
+# MkDocs build output
+site/
+
+# mike local metadata
+.mike/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local helper
+tmp_print_lines.py
