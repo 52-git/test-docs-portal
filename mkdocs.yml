@@ -4,7 +4,8 @@ site_description: Documentation portal with selectable legacy versions
 theme:
   name: material
 
-plugins: []
+plugins:
+  - search
 
 nav:
   - Home: index.md
@@ -30,3 +31,5 @@ nav:
 extra:
   version:
     provider: mike
+
+copyright: Copyright © 2026 - 2040 - Classmethod, Inc.
