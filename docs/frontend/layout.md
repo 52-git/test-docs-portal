@@ -1,3 +1,9 @@
-# Shared Layout
+# src/layout/
 
-Describe the common layout components and navigation patterns.
+## 概要
+アプリ全体の共通レイアウトを構成します。
+
+## コンポーネント
+- `Shell.tsx`: ヘッダー + サイドメニュー + メイン領域の骨格。
+- `HeaderBar.tsx`: 右上のユーザー操作やアカウント表示。
+- `AppMenu.tsx`: 画面遷移用のサイドメニュー。
