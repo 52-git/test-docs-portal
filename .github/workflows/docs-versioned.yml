@@ -62,24 +62,24 @@ jobs:
         run: |
           set -euo pipefail
 
-          git fetch origin "${TARGET_BRANCH}:${TARGET_BRANCH}"
-          git checkout "${TARGET_BRANCH}"
+          git fetch origin "${TARGET_BRANCH}"
+          git checkout -B "${TARGET_BRANCH}" "origin/${TARGET_BRANCH}"
 
           if [ ! -f amplify.yml ]; then
-            cat > amplify.yml <<'YAML'
-version: 1
-frontend:
-  phases:
-    build:
-      commands:
-        - echo "No build step (prebuilt static site)"
-  artifacts:
-    baseDirectory: .
-    files:
-      - '**/*'
-  cache:
-    paths: []
-YAML
+            {
+              echo "version: 1"
+              echo "frontend:"
+              echo "  phases:"
+              echo "    build:"
+              echo "      commands:"
+              echo "        - echo \"No build step (prebuilt static site)\""
+              echo "  artifacts:"
+              echo "    baseDirectory: ."
+              echo "    files:"
+              echo "      - '**/*'"
+              echo "  cache:"
+              echo "    paths: []"
+            } > amplify.yml
 
             git add amplify.yml
             git commit -m "chore: add amplify build spec"
